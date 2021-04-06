@@ -70,7 +70,7 @@ ITEM_PIPELINES = {
     'Real_Estate_Crawler.pipelines.ExtractType': 450,
     'Real_Estate_Crawler.pipelines.RemoveEmptyRealEstate': 500,
     'Real_Estate_Crawler.pipelines.CsvWriter': 600,
-    #'Real_Estate_Crawler.pipelines.MongoWriter': 600
+    'Real_Estate_Crawler.pipelines.MongoWriter': 700
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

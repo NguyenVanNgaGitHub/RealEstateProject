@@ -30,6 +30,7 @@ class RealEstateRawLoader(ItemLoader):
     province_in = MapCompose(str.strip)
     type_in = MapCompose(str.strip, str.lower)
     description_in = MapCompose(str.strip)
+    description_out = Join('\n')
     sellerName_in = MapCompose(str.strip, str.lower, str.title)
     time_in = MapCompose(str.strip, str.lower)
     image_in = MapCompose(str.strip)

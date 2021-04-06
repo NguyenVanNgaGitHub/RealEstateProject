@@ -75,13 +75,36 @@ class ExtractValue:
 class ExtractType:
     def open_spider(self, spider):
         self.classifier = load("model"+os.sep+"typeClassifier.joblib")
+        self.type_mapping = {
+            "Nhà đất": ["Mua bán nhà riêng", "nhà trong hẻm", "Mua bán nhà phố", "nhà mặt tiền", "Nhà ở",
+                        "Mua bán nhà mặt phố", "Nhà riêng", "Nhà mặt phố"],
+            "Đất nền": ["đất thổ cư, đất ở", "Đất", "đất nền, liền kề, đất dự án", "Mua bán đất", "Đất nền khu dân cư",
+                        "mặt bằng", "Đất nền", "Đất nền dự án", "Mua bán đất nền dự án"],
+            "Căn hộ": ["Mua bán căn hộ chung cư", "Căn hộ/Chung cư", "căn hộ chung cư", "Căn hộ chung cư",
+                       "Căn hộ Cao cấp", "Căn hộ trung cấp", "Căn hộ mini", "Căn hộ Tập thể"],
+            "Biệt thự": ["Mua bán biệt thự", "biệt thự, nhà liền kề", "Mua bán nhà biệt thự liền kề",
+                         "Biệt thự liền kề", "Nhà biệt thự"],
+            "Loại hình khác": ["Văn phòng, Mặt bằng kinh doanh", "kho, xưởng", "nhà hàng, khách sạn",
+                               "đất nông, lâm nghiệp", "phòng trọ, nhà trọ", "Mua bán nhà hàng - khách sạn",
+                               "Mua bán văn phòng", "trang trại", "Mua bán phòng trọ", "văn phòng",
+                               "Mặt bằng bán lẻ", "các loại khác", "Mua bán trang trại khu nghỉ dưỡng"]
+        }
+
+    def get_refine_type(self, t):
+        for x in self.type_mapping:
+            if t in self.type_mapping[x]:
+                return x
+        return "UNKNOW"
 
     def process_item(self, item, spider):
         itemAdapter = ItemAdapter(item=item)
         if itemAdapter.get('title') and itemAdapter.get('description'):
-            text = [str(itemAdapter.get('title'))+str(itemAdapter.get('description'))]
-            prediction = self.classifier.predict(text)
-            itemAdapter.update({'type': prediction[0]})
+            type = self.get_refine_type(str(itemAdapter.get("type")))
+            if type=="UNKNOW":
+                text = [str(itemAdapter.get('title'))+str(itemAdapter.get('description'))]
+                prediction = self.classifier.predict(text)
+                type = prediction[0]
+            itemAdapter.update({'type': type})
             return itemAdapter.item
         else:
             return DropItem(f"Missing field in paper at {itemAdapter.get('source')}")
@@ -140,7 +163,7 @@ class CsvWriter:
 class MongoWriter:
     def open_spider(self, spider):
         try:
-            self.client = pymongo.MongoClient("mongodb+srv://nguyenvannga1507:nguyenvannga1507@cluster0.faxqo.mongodb.net/RealEstate?retryWrites=true&w=majority")
+            self.client = pymongo.MongoClient("mongodb+srv://nambn007:nambn007@cluster0.oki5a.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
             self.db = self.client.get_database("RealEstate")
             self.collection = pymongo.collection.Collection(self.db, "RealEstateRaw")
         except Exception as ex:
@@ -155,8 +178,8 @@ class MongoWriter:
     def addRealEstate(self, itemAdapter):
         try:
             self.collection.insert_one({'title': itemAdapter.get('title'),
-                                        'price': itemAdapter.get('value'),
-                                        'square': itemAdapter.get('area'),
+                                        'price': float(itemAdapter.get('value')),
+                                        'square': float(itemAdapter.get('area')),
                                         'address': itemAdapter.get('address'),
                                         'wards': itemAdapter.get('ward'),
                                         'district': itemAdapter.get('district'),
