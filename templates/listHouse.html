@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}ListHouse{% endblock %}
+{% block content %}
+  <!-- Start menu section -->
+  <section id="aa-menu-area">
+    <nav class="navbar navbar-default main-navbar" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <!-- FOR MOBILE VIEW COLLAPSED BUTTON -->
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <!-- LOGO -->
+          <!-- Text based logo -->
+           <a class="navbar-brand aa-logo" href="/"> Home <span>Property</span></a>
+           <!-- Image based logo -->
+           <!-- <a class="navbar-brand aa-logo-img" href="index.html"><img src="static/img/logo.png" alt="logo"></a> -->
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul id="top-menu" class="nav navbar-nav navbar-right aa-main-nav">
+            <li ><a href="/">Trang chủ</a></li>
+            <li class="active"><a href="/xemTin">Nhà đất</a></li>
+            <li><a href="/danh-sach-yeu-thich">Danh sách yêu thích</a></li>
+             {% if user %}
+            <li><a>{{ user.name }}</a></li>
+            {% endif %}
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+  </section>
+  <!-- End menu section -->
+  <section id="aa-property-header">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="aa-property-header-inner">
+            <h2>Danh sách nhà đất</h2>
+            <ol class="breadcrumb">
+            <li><a href="#">Trang chủ</a></li>
+            <li class="active">Nhà đất</li>
+          </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Start Properties  -->
+  <section id="aa-properties">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-8">
+          <div class="aa-properties-content">
+            <!-- start properties content head -->
+            <div class="aa-properties-content-head">
+              <div class="aa-properties-content-head-left">
+                <h1 class="text-info">Danh sách nhà đất</h1>
+              </div>
+              <div class="aa-properties-content-head-right">
+                <a id="aa-grid-properties" href="#"><span class="fa fa-th"></span></a>
+                <a id="aa-list-properties" href="#"><span class="fa fa-list"></span></a>
+              </div>
+            </div>
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                  <div class="btn btn-danger">{{ message }}</div>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+            <!-- Start properties content body -->
+            <div class="aa-properties-content-body">
+              <ul class="aa-properties-nav">
+                {% for item in bds %}
+                <li>
+                  <article class="aa-properties-item">
+                    <a class="aa-properties-item-img" href="#">
+                      {% if item.image != "UNKNOW" %}
+                      <img alt="img" src="{{item.image[0]}}">
+                      {% else %}
+                      <img alt="img" src="{{url_for('static', filename='img/default.jpg')}}">
+                      {% endif %}
+                    </a>
+                    <div class="aa-properties-item-content">
+                      <div class="aa-properties-info">
+                        Người bán : {{item.seller}}
+                      </div>
+                      <div class="aa-properties-about">
+                        <h3><a href="#">{{item.type}}</a></h3>
+                        <p>{{ item.title }}</p>
+                        <p>Địa chỉ : {{item.address}}</p>
+                        <p>Diện tích : {{item.square}}</p>
+                      </div>
+                      <div class="aa-properties-detial">
+                        <span class="aa-price">
+                          ${{ item.price }}
+                        </span>
+                        <a class="aa-secondary-btn" href="xem-chi-tiet/{{item._id}}">View Details</a>
+                      </div>
+<!--                      <a href="{{url_for('addWishList', post_id=item._id)}}"><div class="btn btn-primary">Yêu thích</div></a>-->
+                    </div>
+                  </article>
+                </li>
+                {% endfor %}
+                </ul>
+              {{ pagination.links }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Start properties sidebar -->
+        <div class="col-md-4">
+          <aside class="aa-properties-sidebar">
+            <!-- Start Single properties sidebar -->
+            <div class="aa-properties-single-sidebar">
+              <h3>Properties Search</h3>
+              <form action="/xemTin" method="POST">
+                <div class="aa-single-advance-search">
+                  <label>Loại</label>
+                  <select id="category" name="category">
+                   <option selected="" value="">All</option>
+                    <option value="Nhà">Nhà đất</option>
+                    <option value="Đất nền">Đất nền</option>
+                    <option value="Căn hộ">Căn hộ</option>
+                  </select>
+                   <label>Vị trí(quận)</label>
+                  <select id="location" name="location">
+                   <option selected="" value="">All</option>
+                    <option value="Hoàn Kiếm">Hoàn Kiếm</option>
+                    <option value="Đống Đa">Đống Đa</option>
+                    <option value="Ba Đình">Ba Đình</option>
+                    <option value="Hai Bà Trưng">Hai Bà Trưng</option>
+                    <option value="Hoàng Mai">Hoàng Mai</option>
+                     <option value="Thanh Xuân">Thanh Xuân</option>
+                    <option value="Long Biên">Long Biên</option>
+                    <option value="Nam Từ Liêm">Nam Từ Liêm</option>
+                    <option value="Bắc Từ Liêm">Bắc Từ Liêm</option>
+                    <option value="Tây Hồ">Tây Hồ</option>
+                    <option value="Cầu Giấy">Cầu Giấy</option>
+                    <option value="Hà Đông">Hà Đông</option>
+                  </select>
+                </div>
+
+                <div class="aa-single-filter-search">
+                  <h2 class="text-danger">AREA (SQ)</h2>
+                  <hr>
+                  <span>FROM</span>
+                  <input type="text" class="form-control" name="sq_from" value="0"/>
+                  <span>TO</span>
+                  <input type="text" class="form-control" name="sq_to" value="10000"/>
+                </div>
+
+                <div class="aa-single-filter-search">
+                  <h2 class="text-danger">PRICE ($)</h2>
+                  <hr>
+                  <span>FROM</span>
+                  <input type="text" class="form-control" name="pr_from" value="0"/>
+                  <span>TO</span>
+                  <input type="text" class="form-control" name="pr_to" value="100000"/>
+                </div>
+                <div class="aa-single-advance-search">
+                  <input type="submit" value="Search" class="aa-search-btn">
+                </div>
+              </form>
+            </div>
+
+            <!-- Start Single properties sidebar -->
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- / Properties  -->
+
+{% endblock %}
