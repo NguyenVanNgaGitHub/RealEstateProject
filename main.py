@@ -38,7 +38,8 @@ def register():
             "name" : name,
             "email" : email,
             "password" : password,
-            "postWish" : []
+            "postWish" : [],
+            "historyView" : {}
         }
         users.insert_one(user)
         flash('Đăng kí thành công.Vui lòng đăng nhập')
@@ -57,7 +58,7 @@ def signIn():
                 session['user'] = dumps(user)
                 break
         if ('user' in session):
-            return render_template('home.html', user = loads(session['user']))
+            return redirect(url_for('home'))
         else :
             flash('Email hoặc password không chính xác')
             return render_template('signin.html')
@@ -67,7 +68,7 @@ def signIn():
 @app.route('/dangxuat', methods = ['GET'])
 def logOut():
     session.pop('user')
-    return render_template('home.html')
+    return redirect(url_for('home'))
 
 
 @app.route('/xemTin', methods = ['GET', 'POST'])
@@ -154,14 +155,22 @@ def addWishList(post_id) :
 @app.route('/xem-chi-tiet/<id>')
 def viewDetail(id):
     if 'user' in session:
+        tmp = 0
         isPostWish = 0
         data = batdongsan.find_one( { '_id' : ObjectId(id)} )
         commentPost = comments.find({ "postId" : id})
-        idPostWish = users.find_one({"_id": loads(session['user'])['_id']})
-        print(str(loads(session['user'])['_id']))
-        print(idPostWish['postWish'])
-        if id in idPostWish['postWish']:
+        user = users.find_one({"_id": loads(session['user'])['_id']})
+        if id in user['postWish']:
             isPostWish = 1
+        historyView = user['historyView']
+        print(historyView)
+        for key in historyView:
+            if key == id:
+                tmp = 1
+                users.update_one({"_id": loads(session['user'])['_id']}, { "$inc": {"historyView." + key : 1 } })
+                break
+        if tmp == 0:
+            users.update_one({"_id": loads(session['user'])['_id']}, {"$set": {"historyView." + id : 1}})
         # history = historyView.find_one({"userId" : loads(session['user'])['_id']}, {"postId" : id})
         # if (history):
         #     historyView.update_one({
