@@ -4,7 +4,14 @@ from pymongo import MongoClient
 from flask_paginate import Pagination, get_page_args
 from bson.objectid import ObjectId
 from bson.json_util import dumps,loads
+from search_engine.data import get_data_by_ids
+from search_engine.real_estate_search_engine import RealEstateSearchEngine
+from search_engine.invert_index import InvertIndex
+from search_engine.frequence_dict import FrequenceDict
+from search_engine.information_retrival import InformationRetrival
+from search_engine.create_real_estate_invert_index import create_real_estate_invert_index
 
+search_engine = RealEstateSearchEngine()
 app = Flask(__name__)
 client = MongoClient('mongodb+srv://nambn007:nambn007@cluster0.oki5a.mongodb.net/RealEstate?retryWrites=true&w=majority')
 app.secret_key = 'super secret key'
@@ -193,7 +200,13 @@ def viewDetail(id):
 # search text
 @app.route('/search', methods=['GET'])
 def searchPost():
-    return "xxx"
+    search_str = request.args.get('keyword')
+    recomend_docs = search_engine.find(search_str)
+    recomend_real_estates = get_data_by_ids(ids=[item[0] for item in recomend_docs], client=client)
+    return render_template('listHouse.html', user=loads(session['user']), bds=recomend_real_estates,
+                           page=1,
+                           per_page=100,
+                           pagination=1)
 
 @app.route('/postComment', methods=['POST'])
 def comment():
