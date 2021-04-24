@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% block title %}Xem chi tiết{% endblock %}
+{% block content %}
+<!-- Start menu section -->
+<section id="aa-menu-area">
+    <nav class="navbar navbar-default main-navbar" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <!-- FOR MOBILE VIEW COLLAPSED BUTTON -->
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                        aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <!-- LOGO -->
+                <!-- Text based logo -->
+                <a class="navbar-brand aa-logo" href="/"> Home <span>Property</span></a>
+                <!-- Image based logo -->
+                <!-- <a class="navbar-brand aa-logo-img" href="index.html"><img src="static/img/logo.png" alt="logo"></a> -->
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul id="top-menu" class="nav navbar-nav navbar-right aa-main-nav">
+                    <li><a href="/">Trang chủ</a></li>
+                    <li><a href="/xemTin">Nhà đất</a></li>
+                    <li><a href="/danh-sach-yeu-thich">Danh sách yêu thích</a></li>
+                    {% if user %}
+                    <li><a>{{ user.name }}</a></li>
+                    {% endif %}
+                </ul>
+            </div><!--/.nav-collapse -->
+        </div>
+    </nav>
+    <center>
+        <form style="width:60%" action="search" method="GET">
+              <div class="input-group" style="width:100%">
+                      <input type="text" style="width:90%" placeholder="Nhà đất quận Hai Bà Trưng" class="form-control" name="keyword">
+                      <button type="submit" style="width:10%" class="btn btn-primary">search</button>
+             </div>
+        </form>
+    </center>
+</section>
+<!-- End menu section -->
+
+<!-- Start Proerty header  -->
+<section id="aa-property-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="aa-property-header-inner">
+                    <h2>Xem chi tiết</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Proerty header  -->
+<!-- Start Properties  -->
+<section id="aa-properties">
+    <div class="container">
+        <div class="row">
+             {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                  <div class="btn btn-danger">{{ message }}</div>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+            <br>
+            <div class="col-md-8">
+                <div class="aa-properties-content">
+                    <!-- Start properties content body -->
+                    <div class="aa-properties-details">
+                        <div class="aa-properties-details-img">
+                            {% for x in data.image %}
+                            <img src="{{x}}" alt="img" onerror="this.src='/static/img/default.jpg'">
+                            {% endfor %}
+                        </div>
+                        <div class="aa-properties-info">
+                            <h2>{{data.title}}</h2>
+                            <span class="aa-price">
+                                  {% set price = data.price|string %}
+                                  {% set compose = price.split('.') %}
+                                  {% set first = compose[0]|int %}
+
+                                  {% if first>=1000 %}
+                                      {% set billion=(first/1000)|int %}
+                                      {% set million=first-1000*billion %}
+                                  {% else %}
+                                      {% set billion=0 %}
+                                      {% set million=first %}
+                                  {% endif %}
+
+                                  {% if compose|length == 2 %}
+                                      {% set dong= (1000*(('.'+compose[1])|float))|int%}
+                                  {% else %}
+                                      {% set dong= 0%}
+                                  {% endif %}
+
+                                  {% if billion>0 %}
+                                      {{billion}} tỷ
+                                  {% endif %}
+
+                                  {% if million>0 %}
+                                      {{million}} triệu
+                                  {% endif %}
+
+                                  {% if dong>0 %}
+                                      {{dong}} ngàn
+                                  {% endif %}
+                            </span>
+                            <p>{{data.description}}</p>
+                            <h4>Địa chỉ : {{data.address}}</h4>
+                            <h4>Người bán : {{data.seller}}</h4>
+                            <h4>Ngày đăng : {{data.time}}</h4>
+                            <h3>Xem chi tiết tại <a href="{{data.source}}" target=”_blank” class="text-primary">link</a>
+                            </h3>
+                            <!-- comment threats -->
+                            <!-- Respond box -->
+
+                            {% if isPostWish %}
+                            <div class="btn btn-danger" id="btnLove">Đã yêu thích</div>
+                            {% else %}
+                            <a href="{{url_for('addWishList', post_id=data._id)}}"><div class="btn btn-primary">Thêm vào danh sách yêu thích</div></a>
+
+                            {% endif %}
+                        </div>
+                        <!-- Properties social share -->
+                        <div class="aa-properties-social">
+                            <ul>
+                                <li>Share</li>
+                                <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                                <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+                                <li><a href="#"><i class="fa fa-google-plus"></i></a></li>
+                                <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
+                            </ul>
+                        </div>
+                        <!-- Nearby properties -->
+                    </div>
+                </div>
+            </div>
+            <!-- Start properties sidebar -->
+            <div class="col-md-4">
+                <aside class="aa-properties-sidebar">
+                    <!-- Start Single properties sidebar -->
+                    <!-- Start Single properties sidebar -->
+                    <div class="aa-properties-single-sidebar">
+                        <h3>Populer Properties</h3>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+    </div>
+</section>
+<section class="container">
+      <div class="col-md-12">
+          <h2>Đánh giá của bạn</h2>
+        <div id="rating">
+             <input type="hidden" id="postID" value="{{data._id}}" />
+            <input type="radio" id="star5" name="rating" value="5" />
+            <label class = "full" for="star5" title="Awesome - 5 stars"></label>
+
+            <input type="radio" id="star4" name="rating" value="4" />
+            <label class = "full" for="star4" title="Pretty good - 4 stars"></label>
+
+            <input type="radio" id="star3" name="rating" value="3" />
+            <label class = "full" for="star3" title="Meh - 3 stars"></label>
+
+            <input type="radio" id="star2" name="rating" value="2" />
+            <label class = "full" for="star2" title="Kinda bad - 2 stars"></label>
+
+            <input type="radio" id="star1" name="rating" value="1" />
+            <label class = "full" for="star1" title="Sucks big time - 1 star"></label>
+
+        </div>
+        <div class="clearfix"></div>
+        <div id="result"></div>
+    </div>
+</section>
+<!-- / Properties  -->
+<div class="container">
+    <div class="col-md-12">
+        <div class="aa-comments-area">
+            <h3>Comments</h3>
+            <div class="comments">
+                <ul class="commentlist">
+                     {% for comment in commentPost%}
+                    <li>
+                        <div class="media">
+                            <div class="media-body">
+                                <h4 class="author-name">{{comment.userName}}</h4>
+                                <span class="comments-date">{{comment.time}}</span>
+                                <h4 class="text-danger">{{comment.contentComment}}</h4>
+                            </div>
+
+                        </div>
+                    </li>
+                     {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div id="respond">
+            <h3 class="reply-title">Your Comment</h3>
+            <form id="commentform" action="/postComment" method="post">
+                <p class="comment-form-comment">
+                    <label for="comment">Comment</label>
+                    <textarea required="required" aria-required="true" rows="8" cols="45" name="comment"></textarea>
+                    <input type="hidden" value="{{data._id}}" name="post_id">
+                </p>
+                <p class="form-submit">
+                    <input type="submit" value="Post Comment" class="aa-browse-btn" name="submit">
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+  <!-- Start menu section -->
+  <section id="aa-menu-area">
+    <nav class="navbar navbar-default main-navbar" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <!-- FOR MOBILE VIEW COLLAPSED BUTTON -->
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <!-- LOGO -->
+          <!-- Text based logo -->
+           <a class="navbar-brand aa-logo" href="/"> Home <span>Property</span></a>
+           <!-- Image based logo -->
+           <!-- <a class="navbar-brand aa-logo-img" href="index.html"><img src="static/img/logo.png" alt="logo"></a> -->
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul id="top-menu" class="nav navbar-nav navbar-right aa-main-nav">
+            <li class="active"><a href="/">Trang chủ</a></li>
+            <li><a href="/xemTin">Nhà đất</a></li>
+            <li><a href="/danh-sach-yeu-thich">Danh sách yêu thích</a></li>
+            {% if user %}
+            <li><a>{{ user.name }}</a></li>
+            {% endif %}
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+  </section>
+  <!-- End menu section -->
+ <section id="aa-slider">
+    <div class="aa-slider-area"> 
+      <!-- Top slider -->
+      <div class="aa-top-slider">
+        <!-- Top slider single slide -->
+        <div class="aa-top-slider-single">
+          <img src="static/img/slider/3.jpg" alt="img">
+        </div>
+        <!-- / Top slider single slide -->
+        <!-- Top slider single slide -->
+        <div class="aa-top-slider-single">
+          <img src="static/img/slider/1.png" alt="img">
+        </div>
+        <!-- / Top slider single slide -->
+        <!-- Top slider single slide -->
+        <div class="aa-top-slider-single">
+          <img src="static/img/slider/2.png" alt="img">
+        </div>
+        <!-- / Top slider single slide -->
+         <!-- Top slider single slide -->
+        <div class="aa-top-slider-single">
+          <img src="static/img/slider/5.png" alt="img">
+        </div>
+        <!-- / Top slider single slide -->
+         <!-- Top slider single slide -->
+        <div class="aa-top-slider-single">
+          <img src="static/img/slider/4.png" alt="img">
+        </div>
+        <!-- / Top slider single slide -->
+         <!-- Top slider single slide -->
+        <div class="aa-top-slider-single">
+          <img src="static/img/slider/6.png" alt="img">
+        </div>
+        <!-- / Top slider single slide -->
+      </div>
+    </div>
+  </section>
+ <!-- End slider  -->
+
+  <section style="margin-bottom:30px; margin-top:30px;">
+  <center>
+      <h3 class="aa-title text-danger">Tìm kiếm bất động sản bạn muốn tìm</h3>
+      <form style="width:60%" action="search" method="GET">
+            <div class="input-group" style="width:100%">
+                    <input type="text" style="width:90%" placeholder="Nhà đất quận Hai Bà Trưng" class="form-control" name="keyword">
+                    <button type="submit" style="width:10%" class="btn btn-primary">search</button>
+           </div>
+      </form>
+  </center>
+  </section>
+
+  <section id="aa-latest-property">
+    <div class="container">
+      <div class="aa-latest-property-area">
+        <div class="aa-title">
+          <h2>Các tin quan tâm</h2>
+          <span></span>
+        </div>
+        <div class="aa-latest-properties-content">
+          <div class="row">
+             {% for item in bds %}
+            <div class="col-md-4">
+              <article class="aa-properties-item">
+                    <a class="aa-properties-item-img" href="#">
+                      {% if item.image != "UNKNOW" %}
+                      <img alt="img" src="{{item.image[0]}}" onerror="this.src='/static/img/default.jpg'">
+                      {% else %}
+                      <img alt="img" src="{{url_for('static', filename='img/default.jpg')}}">
+                      {% endif %}
+                    </a>
+                    <div class="aa-properties-item-content">
+                      <div class="aa-properties-info">
+                        Người bán : {{item.seller}}
+                      </div>
+                      <div class="aa-properties-about">
+                        <h3><a href="#">{{item.type}}</a></h3>
+                        <p>{{ item.title }}</p>
+                        <p>Địa chỉ : {{item.address}}</p>
+                        <p>Diện tích : {{item.square}}</p>
+                      </div>
+                      <div class="aa-properties-detial">
+                        <span class="aa-price">
+                          {% set price = item.price|string %}
+                          {% set compose = price.split('.') %}
+                          {% set first = compose[0]|int %}
+
+                          {% if first>=1000 %}
+                              {% set billion=(first/1000)|int %}
+                              {% set million=first-1000*billion %}
+                          {% else %}
+                              {% set billion=0 %}
+                              {% set million=first %}
+                          {% endif %}
+
+                          {% if compose|length == 2 %}
+                              {% set dong= (1000*(('.'+compose[1])|float))|int%}
+                          {% else %}
+                              {% set dong= 0%}
+                          {% endif %}
+
+                          {% if billion>0 %}
+                              {{billion}} tỷ
+                          {% endif %}
+
+                          {% if million>0 %}
+                              {{million}} triệu
+                          {% endif %}
+
+                          {% if dong>0 %}
+                              {{dong}} ngàn
+                          {% endif %}
+                        </span>
+                        <a class="aa-secondary-btn" href="xem-chi-tiet/{{item._id}}">View Details</a>
+                      </div>
+                      <div class="aa-properties-detial">
+                        {% if item._id|string not in postWish %}
+                        <a href="{{url_for('addWishList', post_id=item._id)}}"><div class="btn btn-success">Thêm vào wishlist</div></a>
+                        {% else %}
+                        <a href="{{url_for('delete', post_id=item._id)}}"><div class="btn btn-warning">Xóa khỏi wishlist</div></a>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </article>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+{% endblock %}
