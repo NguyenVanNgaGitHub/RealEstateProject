@@ -139,6 +139,64 @@
                             </ul>
                         </div>
                         <!-- Nearby properties -->
+                        {% for item in recommend_posts[3:] %}
+                    <div class="col-md-6">
+                      <article class="aa-properties-item">
+                            <a class="aa-properties-item-img" href="#">
+                              {% if item.image != "UNKNOW" %}
+                              <img alt="img" src="{{item.image[0]}}" onerror="this.src='/static/img/default.jpg'" style="max-width:100%";>
+                              {% else %}
+                              <img alt="img" src="{{url_for('static', filename='img/default.jpg')}}">
+                              {% endif %}
+                            </a>
+                            <div class="aa-properties-item-content">
+                              <div class="aa-properties-info">
+                                Người bán : {{item.seller}}
+                              </div>
+                              <div class="aa-properties-about">
+                                <h3><a href="#">{{item.type}}</a></h3>
+                                <p>{{ item.title }}</p>
+                                <p>Địa chỉ : {{item.address}}</p>
+                                <p>Diện tích : {{item.square}}</p>
+                              </div>
+                              <div class="aa-properties-detial">
+                                <span class="aa-price">
+                                  {% set price = item.price|string %}
+                                  {% set compose = price.split('.') %}
+                                  {% set first = compose[0]|int %}
+
+                                  {% if first>=1000 %}
+                                      {% set billion=(first/1000)|int %}
+                                      {% set million=first-1000*billion %}
+                                  {% else %}
+                                      {% set billion=0 %}
+                                      {% set million=first %}
+                                  {% endif %}
+
+                                  {% if compose|length == 2 %}
+                                      {% set dong= (1000*(('.'+compose[1])|float))|int%}
+                                  {% else %}
+                                      {% set dong= 0%}
+                                  {% endif %}
+
+                                  {% if billion>0 %}
+                                      {{billion}} tỷ
+                                  {% endif %}
+
+                                  {% if million>0 %}
+                                      {{million}} triệu
+                                  {% endif %}
+
+                                  {% if dong>0 %}
+                                      {{dong}} ngàn
+                                  {% endif %}
+                                </span>
+                                <a class="aa-secondary-btn" href="./{{item._id}}">View Details</a>
+                              </div>
+                            </div>
+                          </article>
+                    </div>
+                 {% endfor %}
                     </div>
                 </div>
             </div>
@@ -151,6 +209,63 @@
                         <h3>Populer Properties</h3>
                     </div>
                 </aside>
+                <!--Insert recommend post in here -->
+                {% for item in recommend_posts[0:3] %}
+                      <article class="aa-properties-item">
+                            <a class="aa-properties-item-img" href="#">
+                              {% if item.image != "UNKNOW" %}
+                              <img alt="img" src="{{item.image[0]}}" onerror="this.src='/static/img/default.jpg'">
+                              {% else %}
+                              <img alt="img" src="{{url_for('static', filename='img/default.jpg')}}">
+                              {% endif %}
+                            </a>
+                            <div class="aa-properties-item-content">
+                              <div class="aa-properties-info">
+                                Người bán : {{item.seller}}
+                              </div>
+                              <div class="aa-properties-about">
+                                <h3><a href="#">{{item.type}}</a></h3>
+                                <p>{{ item.title }}</p>
+                                <p>Địa chỉ : {{item.address}}</p>
+                                <p>Diện tích : {{item.square}}</p>
+                              </div>
+                              <div class="aa-properties-detial">
+                                <span class="aa-price">
+                                  {% set price = item.price|string %}
+                                  {% set compose = price.split('.') %}
+                                  {% set first = compose[0]|int %}
+
+                                  {% if first>=1000 %}
+                                      {% set billion=(first/1000)|int %}
+                                      {% set million=first-1000*billion %}
+                                  {% else %}
+                                      {% set billion=0 %}
+                                      {% set million=first %}
+                                  {% endif %}
+
+                                  {% if compose|length == 2 %}
+                                      {% set dong= (1000*(('.'+compose[1])|float))|int%}
+                                  {% else %}
+                                      {% set dong= 0%}
+                                  {% endif %}
+
+                                  {% if billion>0 %}
+                                      {{billion}} tỷ
+                                  {% endif %}
+
+                                  {% if million>0 %}
+                                      {{million}} triệu
+                                  {% endif %}
+
+                                  {% if dong>0 %}
+                                      {{dong}} ngàn
+                                  {% endif %}
+                                </span>
+                                <a class="aa-secondary-btn" href="./{{item._id}}">View Details</a>
+                              </div>
+                            </div>
+                          </article>
+                 {% endfor %}
             </div>
         </div>
 

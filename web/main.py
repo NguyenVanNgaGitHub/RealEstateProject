@@ -10,13 +10,16 @@ from ai.search_engine.invert_index import InvertIndex
 from ai.search_engine.frequence_dict import FrequenceDict
 from ai.search_engine.information_retrival import InformationRetrival
 from ai.search_engine.create_real_estate_invert_index import create_real_estate_invert_index
+import config as CONFIG
+import copy
+import requests
 
 search_engine = RealEstateSearchEngine()
 app = Flask(__name__)
 client = MongoClient('mongodb+srv://nguyenvannga1507:nguyenvannga1507@cluster0.faxqo.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
 app.secret_key = 'super secret key'
 db = client.RealEstate
-batdongsan = db.RealEstateRaw
+batdongsan = db.RealEstateClean
 users = db.users
 comments = db.comments
 ratingPost = db.rating
@@ -204,7 +207,18 @@ def viewDetail(id):
             users.update_one({"_id": loads(session['user'])['_id']}, { "$inc": {"historyView." + id : 1 } })
         else:
             users.update_one({"_id": loads(session['user'])['_id']}, {"$set": {"historyView." + id : 1}})
-        return render_template('detail.html', user=loads(session['user']), data = data, commentPost=commentPost, isPostWish=isPostWish)
+
+        data_temp = copy.copy(data)
+        data_temp['_id'] = str(data_temp['_id'])
+
+        result = requests.post(CONFIG.API_AI + 'get_recommend_posts', json={
+            'post': data_temp,
+            'num_post': CONFIG.DEFAULT_NUM_RECOMMEND_POST
+        }, )
+
+        recommend_posts = result.json()['data']
+
+        return render_template('detail.html', user=loads(session['user']), data = data, commentPost=commentPost, isPostWish=isPostWish, recommend_posts=recommend_posts)
     else:
         return render_template('signin.html')
 
@@ -222,6 +236,7 @@ def searchPost():
                                page=1,
                                per_page=100,
                                pagination=1)
+
     else:
         return render_template('listHouse.html', bds=recomend_real_estates,postWish=[],
                                page=1,
@@ -271,6 +286,7 @@ def rating():
                 "rating" : value
             }
             ratingPost.insert_one(obj)
+
 
 
 if __name__ == '__main__':

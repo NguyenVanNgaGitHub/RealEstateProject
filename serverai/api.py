@@ -34,9 +34,6 @@ def get_recommend_posts():
                 'code': MessageCode.CODE_ERROR_DATA
             }
 
-        with open(os.path.join(CONFIG.ROOT_DIR, 'ai', 'data', 'example_bds.pk'), 'wb') as f:
-            pickle.dump(post, f)
-
         start = time.time()
         recommend_sys = SimpleRecommendSystem(post=post, num_of_recommend_post=number_post)
         posts = recommend_sys.find_recommend_posts(online=True)
