@@ -214,6 +214,7 @@ def searchPost():
     search_str = request.args.get('keyword')
     recomend_docs = search_engine.find(search_str)
     recomend_real_estates = get_data_by_ids(ids=recomend_docs.keys(), client=client)
+
     if "user" in session:
         user = loads(session["user"])
         postWish = user["postWish"]
