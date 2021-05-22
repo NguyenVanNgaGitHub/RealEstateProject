@@ -24,6 +24,7 @@
             <li class="active"><a href="/">Trang chủ</a></li>
             <li><a href="/xemTin">Nhà đất</a></li>
             <li><a href="/danh-sach-yeu-thich">Danh sách yêu thích</a></li>
+              <li><a href="/thong-ke">Thống kê</a></li>
             {% if user %}
             <li><a>{{ user.name }}</a></li>
             {% endif %}
@@ -88,12 +89,90 @@
     <div class="container">
       <div class="aa-latest-property-area">
         <div class="aa-title">
-          <h2>Các tin quan tâm</h2>
+          <h2>Bất động dành cho bạn</h2>
           <span></span>
         </div>
         <div class="aa-latest-properties-content">
           <div class="row">
-             {% for item in bds %}
+             {% for item in recommend_bds %}
+            <div class="col-md-4">
+              <article class="aa-properties-item">
+                    <a class="aa-properties-item-img" href="#">
+                      {% if item.image != "UNKNOW" %}
+                      <img alt="img" src="{{item.image[0]}}" onerror="this.src='/static/img/default.jpg'">
+                      {% else %}
+                      <img alt="img" src="{{url_for('static', filename='img/default.jpg')}}">
+                      {% endif %}
+                    </a>
+                    <div class="aa-properties-item-content">
+                      <div class="aa-properties-info">
+                        Người bán : {{item.seller}}
+                      </div>
+                      <div class="aa-properties-about">
+                        <h3><a href="#">{{item.type}}</a></h3>
+                        <p>{{ item.title }}</p>
+                        <p>Địa chỉ : {{item.address}}</p>
+                        <p>Diện tích : {{item.square}}</p>
+                      </div>
+                      <div class="aa-properties-detial">
+                        <span class="aa-price">
+                          {% set price = item.price|string %}
+                          {% set compose = price.split('.') %}
+                          {% set first = compose[0]|int %}
+
+                          {% if first>=1000 %}
+                              {% set billion=(first/1000)|int %}
+                              {% set million=first-1000*billion %}
+                          {% else %}
+                              {% set billion=0 %}
+                              {% set million=first %}
+                          {% endif %}
+
+                          {% if compose|length == 2 %}
+                              {% set dong= (1000*(('.'+compose[1])|float))|int%}
+                          {% else %}
+                              {% set dong= 0%}
+                          {% endif %}
+
+                          {% if billion>0 %}
+                              {{billion}} tỷ
+                          {% endif %}
+
+                          {% if million>0 %}
+                              {{million}} triệu
+                          {% endif %}
+
+                          {% if dong>0 %}
+                              {{dong}} ngàn
+                          {% endif %}
+                        </span>
+                        <a class="aa-secondary-btn" href="xem-chi-tiet/{{item._id}}">View Details</a>
+                      </div>
+                      <div class="aa-properties-detial">
+                        {% if item._id|string not in postWish %}
+                        <a href="{{url_for('addWishList', post_id=item._id)}}"><div class="btn btn-success">Thêm vào wishlist</div></a>
+                        {% else %}
+                        <a href="{{url_for('delete', post_id=item._id)}}"><div class="btn btn-warning">Xóa khỏi wishlist</div></a>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </article>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="aa-latest-property-area">
+        <div class="aa-title">
+          <h2>Bất động sản mới nhất</h2>
+          <span></span>
+        </div>
+        <div class="aa-latest-properties-content">
+          <div class="row">
+             {% for item in new_bds %}
             <div class="col-md-4">
               <article class="aa-properties-item">
                     <a class="aa-properties-item-img" href="#">

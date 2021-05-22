@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}Thống kê{% endblock %}
+{% block content %}
+<!-- Start menu section -->
+<section id="aa-menu-area">
+    <nav class="navbar navbar-default main-navbar" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <!-- FOR MOBILE VIEW COLLAPSED BUTTON -->
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                        aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <!-- LOGO -->
+                <!-- Text based logo -->
+                <a class="navbar-brand aa-logo" href="/"> Home <span>Property</span></a>
+                <!-- Image based logo -->
+                <!-- <a class="navbar-brand aa-logo-img" href="index.html"><img src="static/img/logo.png" alt="logo"></a> -->
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul id="top-menu" class="nav navbar-nav navbar-right aa-main-nav">
+                    <li><a href="/">Trang chủ</a></li>
+                    <li><a href="/xemTin">Nhà đất</a></li>
+                    <li><a href="/danh-sach-yeu-thich">Danh sách yêu thích</a></li>
+                    {% if user %}
+                    <li><a>{{ user.name }}</a></li>
+                    {% endif %}
+                </ul>
+            </div><!--/.nav-collapse -->
+        </div>
+    </nav>
+    <center>
+        <form style="width:60%" action="search" method="GET">
+              <div class="input-group" style="width:100%">
+                      <input type="text" style="width:90%" placeholder="Nhà đất quận Hai Bà Trưng" class="form-control" name="keyword">
+                      <button type="submit" style="width:10%" class="btn btn-primary">search</button>
+             </div>
+        </form>
+    </center>
+</section>
+<!-- End menu section -->
+
+<!-- Start Proerty header  -->
+<section id="aa-property-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="aa-property-header-inner">
+                    <h2>Thống kê</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Proerty header  -->
+<section id="aa-properties">
+    <div class="container">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div style="width: 800px; margin:0 auto;">
+                    <h2 style="display: inline">Chọn tháng - năm: </h2>
+                    <select id="form-select-date" class="form-select form-select-lg mb-3", onchange="onChangeTime(false)">
+                    </select>
+                </div>
+                    <div id="TimeMeanPrice"></div>
+                <div class="col-md-6">
+                    <ul>
+                    <li>
+                        <div id="TimeNumberDoc"></div>
+                    </li>
+                    <li>
+                        <div id="TimeMeanSquare"></div>
+                    </li>
+                </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    var dataStatistic = JSON.parse('{{ data | tojson }}');
+    var timeNumberDoc = dataStatistic['timeNumberDoc'];
+    var timeMeanSquare = dataStatistic['timeMeanSquare'];
+    var timeMeanPrice = dataStatistic['timeMeanPrice'];
+
+    console.log(timeNumberDoc);
+    console.log(timeMeanSquare);
+    console.log(timeMeanPrice);
+
+
+    function buildDataVisualize(data){
+        var titles = [];
+        var LABELS = [];
+        var DATA = [];
+
+        for(const [key, value] of Object.entries(data)){
+            var year = key.substring(0,4);
+            var month = key.substring(4,5);
+            var title = month + '-' + year;
+            titles.push(title);
+            var labels = []
+            var data = []
+            for(const [key2, value2] of Object.entries(value)){
+                labels.push(key2);
+                data.push(value2);
+            }
+            LABELS.push(labels);
+            DATA.push(data);
+        }
+
+        return [titles, LABELS, DATA]
+    }
+
+    function buildSelectData(titles){
+      var select = document.getElementById('form-select-date');
+
+      for(var i=0; i<titles.length; i++){
+        var z = document.createElement("option");
+        z.setAttribute("value", titles[i]);
+        var t = document.createTextNode(titles[i]);
+        z.appendChild(t);
+        select.appendChild(z);
+      }
+    }
+
+    function buildBarChart(labels, data, title, canvas){
+        const dataVisual = {
+          labels: labels,
+          datasets: [{
+            label: title,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgb(75, 192, 192)',
+            data: data,
+          }]
+        };
+        const config = {
+            type: 'bar',
+            data: dataVisual,
+            scaleShowValues: true,
+            options: {
+                indexAxis: 'y',
+                xAxes: [{
+                  ticks: {
+                    maxRotation: 50,
+                    minRotation: 30,
+                    padding: 10,
+                    autoSkip: false,
+                    fontSize: 10
+                  }
+                }]
+            }
+        }
+        var myChart = new Chart(
+            canvas,
+            config
+        )
+    }
+
+    var titles_doc = []; var labels_doc = []; var data_docs = [];
+    var titles_price = []; var labels_price = []; var data_price = [];
+    var titles_square = []; var labels_square = []; var data_square = [];
+    var listDiv = [ 'TimeNumberDoc', 'TimeMeanPrice', 'TimeMeanSquare']
+    function INIT(){
+       [titles_doc, labels_doc, data_doc] = buildDataVisualize(timeNumberDoc);
+       [titles_price, labels_price, data_price] = buildDataVisualize(timeMeanPrice);
+       [titles_square, labels_square, data_square] = buildDataVisualize(timeMeanSquare);
+
+       titles_doc.push('a');
+       buildSelectData(titles_doc);
+       onChangeTime(true, 'TimeNumberDoc');
+       onChangeTime(true, 'TimeMeanPrice');
+       onChangeTime(true, 'TimeMeanSquare');
+    }
+
+    function onChangeTime(init){
+      var value = document.getElementById('form-select-date').value;
+      for(var j=0; j < listDiv.length; j++){
+          var div = document.getElementById(listDiv[j]);
+          div.innerHTML = "";
+          var canvas = document.createElement('CANVAS');
+          div.appendChild(canvas);
+
+          console.log(value);
+          var index = 0
+          for(var i=0; i<titles_doc.length; i++){
+            if(titles_doc[i] == value){
+                index = i;
+                break;
+            }
+          }
+
+          if(init){
+            index = 0;
+          }
+
+          if(listDiv[j] == 'TimeNumberDoc'){
+            buildBarChart(labels_doc[index], data_doc[index], 'Số lượng bài viết bất động sản theo từng quận tháng ' + titles_doc[index], canvas);
+          } else if(listDiv[j] == 'TimeMeanPrice'){
+            buildBarChart(labels_price[index], data_price[index], 'Giá bất động sản theo từng quận ' + titles_price[index], canvas);
+          } else if(listDiv[j] == 'TimeMeanSquare'){
+            buildBarChart(labels_square[index], data_square[index], 'Diện tích bất động sản theo từng quận ' + titles_square[index], canvas);
+          }
+      }
+
+    }
+
+    INIT();
+
+</script>
+
+{% endblock %}

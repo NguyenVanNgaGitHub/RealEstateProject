@@ -1,9 +1,8 @@
-from datetime import datetime
+from ai.search_engine.data import get_data
 
-date_time_str = '26/03/2021'
+data = get_data()
+type = set(item["type"] for item in data)
+print(type)
 
-date_time_obj = datetime.strptime(date_time_str, '%d/%m/%Y')
-
-
-print("The type of the date is now",  type(date_time_obj))
-print("The date is", date_time_obj)
+district = sorted(set(item["district"] for item in data))
+print(district)
