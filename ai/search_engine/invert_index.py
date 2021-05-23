@@ -29,7 +29,7 @@ class InvertIndex(Dict[str,List[str]]):
                 min_edit=ds
             elif min_edit==ds:
                 best_fit.append(key)
-        if min_edit>0.5*len(token):
+        if min_edit>min(4,0.1*len(token)):
             return [],float("+inf")
         else:
             return best_fit,min_edit

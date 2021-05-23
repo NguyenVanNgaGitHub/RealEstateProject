@@ -139,7 +139,9 @@
                             </ul>
                         </div>
                         <!-- Nearby properties -->
-                        {% for item in recommend_posts[3:] %}
+                    </div>
+                </div>
+                              {% for item in recommend_posts[3:] %}
                     <div class="col-md-6">
                       <article class="aa-properties-item">
                             <a class="aa-properties-item-img" href="#">
@@ -197,8 +199,6 @@
                           </article>
                     </div>
                  {% endfor %}
-                    </div>
-                </div>
             </div>
             <!-- Start properties sidebar -->
             <div class="col-md-4">
@@ -209,6 +209,7 @@
                         <h3>Populer Properties</h3>
                     </div>
                 </aside>
+
                 <!--Insert recommend post in here -->
                 {% for item in recommend_posts[0:3] %}
                       <article class="aa-properties-item">
@@ -267,6 +268,7 @@
                           </article>
                  {% endfor %}
             </div>
+
         </div>
 
     </div>
