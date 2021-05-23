@@ -24,7 +24,8 @@
             <li class="active"><a href="/">Trang chủ</a></li>
             <li><a href="/xemTin">Nhà đất</a></li>
             <li><a href="/danh-sach-yeu-thich">Danh sách yêu thích</a></li>
-            {% if user %}
+            <li><a href="/thong-ke">Thống kê</a></li>
+              {% if user %}
             <li><a>{{ user.name }}</a></li>
             {% endif %}
           </ul>

@@ -5,6 +5,8 @@ class DataBase(object):
     MONGO_URI = 'mongodb+srv://nambn007:nambn007@cluster0.faxqo.mongodb.net/RealEstate?retryWrites=true&w=majority'
     MONGO_DATABASE = 'RealEstate'
     COLLECTION_REAL_ESTATE_NAME = 'RealEstateClean'
+    COLLECTION_TIME_DISTRICT = 'TimeVisualize'
+    COLLECTION_TIME_MEAN = 'TimeMean'
 
     @staticmethod
     def connect_to_database():

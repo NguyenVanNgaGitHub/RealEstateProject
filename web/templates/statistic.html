@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+{% block title %}Thống kê{% endblock %}
+{% block content %}
+<!-- Start menu section -->
+<section id="aa-menu-area">
+    <nav class="navbar navbar-default main-navbar" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <!-- FOR MOBILE VIEW COLLAPSED BUTTON -->
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                        aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <!-- LOGO -->
+                <!-- Text based logo -->
+                <a class="navbar-brand aa-logo" href="/"> Home <span>Property</span></a>
+                <!-- Image based logo -->
+                <!-- <a class="navbar-brand aa-logo-img" href="index.html"><img src="static/img/logo.png" alt="logo"></a> -->
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul id="top-menu" class="nav navbar-nav navbar-right aa-main-nav">
+                    <li><a href="/">Trang chủ</a></li>
+                    <li><a href="/xemTin">Nhà đất</a></li>
+                    <li><a href="/danh-sach-yeu-thich">Danh sách yêu thích</a></li>
+                    {% if user %}
+                    <li><a>{{ user.name }}</a></li>
+                    {% endif %}
+                </ul>
+            </div><!--/.nav-collapse -->
+        </div>
+    </nav>
+    <center>
+        <form style="width:60%" action="search" method="GET">
+              <div class="input-group" style="width:100%">
+                      <input type="text" style="width:90%" placeholder="Nhà đất quận Hai Bà Trưng" class="form-control" name="keyword">
+                      <button type="submit" style="width:10%" class="btn btn-primary">search</button>
+             </div>
+        </form>
+    </center>
+</section>
+<!-- End menu section -->
+
+<!-- Start Proerty header  -->
+<section id="aa-property-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="aa-property-header-inner">
+                    <h2>Thống kê</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Proerty header  -->
+<section id="aa-properties">
+    <div class="container">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div style="width: 800px; margin:0 auto;">
+                    <h2 style="display: inline">Chọn tháng - năm: </h2>
+                    <select id="form-select-date" class="form-select form-select-lg mb-3", onchange="onChangeTime(false)">
+                    </select>
+                </div>
+                    <div id="TimeMeanPrice"></div>
+                <div class="col-md-6">
+                    <ul>
+                        <li>
+                            <div id="TimeNumberDoc"></div>
+                        </li>
+                        <li>
+                            <div id="PriceMean"></div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul>
+                        <li><div id="TimeMeanSquare"></div></li>
+                        <li><div id="SquareMean"></div></li>
+                    </ul>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    var dataStatistic = JSON.parse('{{ data | tojson }}');
+    var timeDistrict = dataStatistic['timeDistrict'];
+    var timeMean = dataStatistic['timeMean'];
+
+    console.log(timeDistrict);
+    console.log(timeMean);
+
+    function buildDataVisualize(data){
+        var titles = [];
+        var LABELS = [];
+        var DATA = [];
+
+        for(const [key, value] of Object.entries(data)){
+            titles.push(key);
+            var labels = [];
+            var data_price = [];
+            var data_square = [];
+            var data_num = [];
+            for(const [key2, value2] of Object.entries(value)){
+                labels.push(key2);
+                data_num.push(value2['num']);
+                data_price.push(value2['price']);
+                data_square.push(value2['square']);
+            }
+            LABELS.push(labels);
+            DATA.push([data_num, data_price, data_square]);
+        }
+
+        return [titles, LABELS, DATA]
+    }
+
+    function buildSelectData(titles){
+      var select = document.getElementById('form-select-date');
+
+      for(var i=0; i<titles.length; i++){
+        var z = document.createElement("option");
+        z.setAttribute("value", titles[i]);
+        var t = document.createTextNode(titles[i]);
+        z.appendChild(t);
+        select.appendChild(z);
+      }
+    }
+
+    var backgroundColors = [  'rgba(255, 99, 132, 0.5)',
+                'rgb(255, 165, 0, 0.5)',
+                'rgba(255, 73, 71, 0.5)' ];
+    var borderColors = [
+                'rgba(255, 99, 132, 1)',
+                'rgba(255, 165, 0, 1)',
+                'rgba(255, 73, 71, 1)'
+    ];
+    var count = 0;
+
+    function copy(x) {
+        return JSON.parse( JSON.stringify(x) );
+    }
+
+    function buildBarChart(labels, data, label, title, canvas){
+        data_copy = copy(data);
+        labels_copy = copy(labels);
+
+        for(var i=0; i < labels_copy.length - 1; i++){
+            for(var j=i+1; j < labels_copy.length; j++){
+                if(data_copy[i] < data_copy[j]){
+                    var temp = labels_copy[i];
+                    labels_copy[i] = labels_copy[j];
+                    labels_copy[j] = temp;
+
+                    var temp1 = data_copy[i];
+                    data_copy[i] = data_copy[j];
+                    data_copy[j] = temp1;
+                }
+            }
+        }
+
+        const dataVisual = {
+          labels: labels_copy,
+          datasets: [{
+            label: label,
+            backgroundColor: backgroundColors[count % 3],
+            borderColor: borderColors[count % 3],
+            data: data_copy,
+          }]
+        };
+        const config = {
+            type: 'bar',
+            data: dataVisual,
+            scaleShowValues: true,
+            options: {
+                indexAxis: 'y',
+                xAxes: [{
+                  ticks: {
+                    maxRotation: 50,
+                    minRotation: 30,
+                    padding: 10,
+                    autoSkip: false,
+                    fontSize: 10
+                  }
+                }],
+                plugins: {
+                  legend: {
+                    position: 'top',
+                  },
+                  title: {
+                    display: true,
+                    text: title
+                  }
+                }
+            }
+        }
+        var myChart = new Chart(
+            canvas,
+            config
+        );
+        count += 1;
+    }
+
+    function buildLineChart(labels, data, label, title, canvas){
+        console.log(labels);
+        console.log(data);
+
+        var data = {
+            labels: labels,
+            datasets: [
+                {
+                    label: label,
+                    data: data,
+                    backgroundColor: backgroundColors[0]
+                }
+            ]
+        }
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                  legend: {
+                    position: 'top',
+                  },
+                  title: {
+                    display: true,
+                    text: title
+                  }
+                }
+            }
+        };
+
+        var myChart = new Chart(
+            canvas,
+            config
+        );
+    }
+
+
+    var labels = []
+    var titles = []
+    var data = []
+    var listDiv = [ 'TimeNumberDoc', 'TimeMeanPrice', 'TimeMeanSquare']
+    function INIT(){
+       [titles, labels, data] = buildDataVisualize(timeDistrict);
+
+       for(var i=0; i<titles.length-1; i++){
+          for(var j=i+1; j<titles.length; j++){
+            if(parseInt(titles[i]) > parseInt(titles[j])){
+                var temp = titles[i];
+                titles[i] = titles[j];
+                titles[j] = temp;
+
+                var temp1 = labels[i];
+                labels[i] = labels[j];
+                labels[j] = temp1;
+
+                var temp2 = data[i];
+                data[i] = data[j];
+                data[j] = temp2;
+            }
+          }
+       }
+
+       buildSelectData(titles);
+       onChangeTime(true, 'TimeNumberDoc');
+       onChangeTime(true, 'TimeMeanPrice');
+       onChangeTime(true, 'TimeMeanSquare');
+       onBuildTimeMean();
+    }
+
+    function onBuildTimeMean(){
+        var labels = [];
+        var data_price = [];
+        var data_square = [];
+        for(const [key, value] of Object.entries(timeMean)){
+            labels.push(key);
+            data_price.push(value['price']);
+            data_square.push(value['square']);
+        }
+
+        var divPrice = document.getElementById('PriceMean');
+        divPrice.innerHTML = '';
+        var divSquare = document.getElementById('SquareMean');
+        divSquare.innerHTML = '';
+        var canvas1 = document.createElement('CANVAS');
+        var canvas2 = document.createElement('CANVAS');
+        divPrice.appendChild(canvas1);
+        divSquare.appendChild(canvas2);
+
+<!--        labels.push('20203');-->
+<!--        data_price.push(5000);-->
+<!--        data_square.push(1000);-->
+
+        for(var i=0; i < labels.length - 1; i++){
+            for(var j=i+1; j < labels.length; j++){
+                if(parseInt(labels[i]) > parseInt(labels[j])){
+                    var temp = labels[i];
+                    labels[i] = labels[j];
+                    labels[j] = temp;
+
+                    var temp1 = data_square[i];
+                    data_square[i] = data_square[j];
+                    data_square[j] = temp1;
+
+                    var temp2 = data_price[i];
+                    data_price[i] = data_price[j];
+                    data_price[j] = temp2;
+                }
+            }
+        }
+
+        for(var i=0; i < labels.length; i++){
+            labels[i] = labels[i].substring(4,5) + '-' + labels[i].substring(0,4);
+        }
+
+        buildLineChart(labels, data_price, 'Giá trung bình (triệu đồng)', 'Giá trùng bình bất động sản theo từng tháng', canvas1);
+        buildLineChart(labels, data_square, 'Diện tích trung bình (m2)', 'Diện tích trung bình bất động sản theo từng tháng', canvas2);
+    }
+
+    function onChangeTime(init){
+      var value = document.getElementById('form-select-date').value;
+      for(var j=0; j < listDiv.length; j++){
+          var div = document.getElementById(listDiv[j]);
+          div.innerHTML = "";
+          var canvas = document.createElement('CANVAS');
+          div.appendChild(canvas);
+
+          console.log(value);
+          var index = 0
+          for(var i=0; i< titles.length; i++){
+            if(titles[i] == value){
+                index = i;
+                break;
+            }
+          }
+
+          if(init){
+            index = 0;
+          }
+
+          if(listDiv[j] == 'TimeNumberDoc'){
+            buildBarChart(labels[index], data[index][0], 'Số lượng bài viết', 'Số lượng bài viết bất động sản theo từng quận tháng ' + titles[index], canvas);
+          } else if(listDiv[j] == 'TimeMeanPrice'){
+            buildBarChart(labels[index], data[index][1], 'Giá trung bình (triệu đồng)', 'Giá bất động sản theo từng quận tháng ' + titles[index], canvas);
+          } else if(listDiv[j] == 'TimeMeanSquare'){
+            buildBarChart(labels[index], data[index][2], 'Diện tích trung bình (m2)', 'Diện tích bất động sản theo từng quận tháng ' + titles[index], canvas);
+          }
+      }
+    }
+
+    INIT();
+
+</script>
+
+{% endblock %}

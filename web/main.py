@@ -10,6 +10,7 @@ from ai.search_engine.invert_index import InvertIndex
 from ai.search_engine.frequence_dict import FrequenceDict
 from ai.search_engine.information_retrival import InformationRetrival
 from ai.search_engine.create_real_estate_invert_index import create_real_estate_invert_index
+from database.database import DataBase
 import config as CONFIG
 import copy
 import requests
@@ -287,6 +288,23 @@ def rating():
             }
             ratingPost.insert_one(obj)
 
+
+@app.route('/thong-ke', methods=['GET', 'POST'])
+def statistic():
+    if 'user' in session:
+        # GetData for statistic
+        time_district = list(db[DataBase.COLLECTION_TIME_DISTRICT].find(filter={}))[0]
+        time_mean = list(db[DataBase.COLLECTION_TIME_MEAN].find(filter={}))[0]
+
+        time_district.pop('_id', None)
+        time_mean.pop('_id', None)
+
+        return render_template('statistic.html', data={
+            "timeDistrict": time_district,
+            "timeMean": time_mean
+        })
+    else:
+        return render_template('signin.html')
 
 
 if __name__ == '__main__':
