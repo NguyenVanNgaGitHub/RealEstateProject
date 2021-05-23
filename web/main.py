@@ -300,26 +300,6 @@ def rating():
             }
             ratingPost.insert_one(obj)
 
-import json
-@app.route('/thong-ke', methods=['GET', 'POST'])
-def statistic():
-    if 'user' in session:
-        # GetData for statistic
-        time_number_doc = list(db[DataBase.COLLECTION_TIME_NUMBER_DOC].find(filter={}))[0]
-        time_mean_square = list(db[DataBase.COLLECTION_TIME_MEAN_SQUARE].find(filter={}))[0]
-        time_mean_price = list(db[DataBase.COLLECTION_TIME_MEAN_PRICE].find(filter={}))[0]
-
-        time_number_doc.pop('_id', None)
-        time_mean_square.pop('_id', None)
-        time_mean_price.pop('_id', None)
-
-        return render_template('statistic.html', data={
-            "timeNumberDoc": time_number_doc,
-            "timeMeanSquare": time_mean_square,
-            "timeMeanPrice": time_mean_price
-        })
-    else:
-        return render_template('signin.html')
 
 @app.route('/thong-ke', methods=['GET', 'POST'])
 def statistic():
